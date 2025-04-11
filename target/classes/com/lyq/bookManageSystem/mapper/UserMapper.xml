@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lyq.bookManageSystem.mapper.UserMapper">
+
+    <select id="selectList" resultType="com.lyq.bookManageSystem.entity.User">
+        select * from user
+    </select>
+
+    <select id="selectUserById" resultType="com.lyq.bookManageSystem.entity.User">
+        select * from user where id = #{id}
+    </select>
+
+    <select id="selectUserByUserName" resultType="com.lyq.bookManageSystem.entity.User">
+        select * from user where user_name = #{userName}
+    </select>
+
+    <insert id="insertUser" parameterType="com.lyq.bookManageSystem.entity.User">
+        insert into user values(null,#{userName},#{password},#{role},#{name})
+    </insert>
+
+    <update id="updateUser" parameterType="com.lyq.bookManageSystem.entity.User">
+        update user
+        <set>
+            <if test="userName!=null">
+                user_name=#{userName},
+            </if>
+            <if test="password!=null">
+                password=#{password},
+            </if>
+            <if test="role!=null">
+                role=#{role},
+            </if>
+            <if test="name!=null">
+                name=#{name},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="deleteUserById" parameterType="java.lang.Integer">
+       delete from user where  id=#{id}
+    </delete>
+
+
+
+
+
+</mapper>

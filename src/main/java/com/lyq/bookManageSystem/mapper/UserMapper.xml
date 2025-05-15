@@ -1,24 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lyq.bookManageSystem.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.lyq.bookManageSystem.model.entity.User">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="user_name" jdbcType="VARCHAR" property="userName" />
+        <result column="role" jdbcType="INTEGER" property="role" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
 
-    <select id="selectList" resultType="com.lyq.bookManageSystem.entity.User">
-        select * from user
+        <result column="birthday" jdbcType="DATE" property="birthday" />
+        <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="email" jdbcType="VARCHAR" property="email" />
+        <result column="is_locked" jdbcType="TINYINT" property="isLocked" />
+
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_name, role, name, birthday, phone, email, is_locked, password
+    </sql>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from user
+        <where>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND user_name LIKE CONCAT('%', #{userName}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name  LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="role != null">
+                AND role = #{role}
+            </if>
+            <if test="isLocked != null">
+                AND is_locked = #{isLocked}
+            </if>
+        </where>
     </select>
 
-    <select id="selectUserById" resultType="com.lyq.bookManageSystem.entity.User">
-        select * from user where id = #{id}
+    <select id="getTotal" resultType="INTEGER">
+        select COUNT(*)
+        from user
+        <where>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND user_name LIKE CONCAT('%', #{userName}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name  LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="role != null">
+                AND role = #{role}
+            </if>
+            <if test="isLocked != null">
+                AND is_locked = #{isLocked}
+            </if>
+        </where>
     </select>
 
-    <select id="selectUserByUserName" resultType="com.lyq.bookManageSystem.entity.User">
-        select * from user where user_name = #{userName}
+    <select id="selectUserById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from user where id = #{id}
     </select>
 
-    <insert id="insertUser" parameterType="com.lyq.bookManageSystem.entity.User">
-        insert into user values(null,#{userName},#{password},#{role},#{name})
+    <select id="selectUserByUserName" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from user where user_name = #{userName}
+    </select>
+
+    <insert id="insertUser" parameterType="com.lyq.bookManageSystem.model.entity.User">
+        insert into user
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="userName != null">user_name,</if>
+                <if test="password != null">password,</if>
+                <if test="role != null">role,</if>
+                <if test="name != null">name,</if>
+            </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userName != null">
+            #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null">
+            #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="role != null">
+            #{role,jdbcType=INTEGER},
+            </if>
+            <if test="name != null">
+            #{name,jdbcType=VARCHAR},
+            </if>
+        </trim>
     </insert>
 
-    <update id="updateUser" parameterType="com.lyq.bookManageSystem.entity.User">
+    <update id="updateUser" parameterType="com.lyq.bookManageSystem.model.entity.User">
         update user
         <set>
             <if test="userName!=null">
@@ -33,14 +115,33 @@
             <if test="name!=null">
                 name=#{name},
             </if>
+
+            <if test="isLocked!=null">
+                is_locked=#{isLocked},
+            </if>
+            <if test="birthday!=null">
+                birthday=#{birthday},
+            </if>
+            <if test="phone!=null">
+                phone=#{phone},
+            </if>
+            <if test="email!=null">
+                email=#{email},
+            </if>
         </set>
-        where id=#{id}
+        where id=#{id,jdbcType=INTEGER}
     </update>
 
-    <delete id="deleteUserById" parameterType="java.lang.Integer">
-       delete from user where  id=#{id}
+    <delete id="deleteUserById" parameterType="java.lang.Long">
+       delete from user where  id=#{id,jdbcType=INTEGER}
     </delete>
 
+    <delete id="deleteAllById">
+        DELETE FROM user WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id,jdbcType=INTEGER}
+        </foreach>
+    </delete>
 
 
 

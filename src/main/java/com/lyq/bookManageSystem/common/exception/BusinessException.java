@@ -1,4 +1,4 @@
-package com.lyq.bookManageSystem.exception;
+package com.lyq.bookManageSystem.common.exception;
 
 public class BusinessException extends RuntimeException {
     private final int code;

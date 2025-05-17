@@ -4,15 +4,21 @@ import com.lyq.bookManageSystem.model.DTO.UserDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecureDigestAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtils {
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${jwt.secret}")
     private String secretStr; // 从配置文件读取的密钥字符串
@@ -47,10 +53,27 @@ public class JwtUtils {
                 .compact();
     }
 
+    //   验证令牌有效性
+    public boolean validateToken(String token) {
+
+        try {
+            if (redisTemplate.hasKey("jwt:blacklist:" + token)) {
+                return false;
+            }
+            Claims claims = parseToken(token);  // 调用现有解析方法
+
+
+            return !isTokenExpired(claims.getExpiration());  // 附加过期检查
+        } catch (JwtException | IllegalArgumentException e) {
+            // 捕获所有JWT相关异常（签名无效、格式错误等）
+//            log.error("JWT验证失败: {}", e.getMessage());
+            return false;
+        }
+    }
+
     /**
      * 解析验证JWT令牌
-     * @param token JWT字符串
-     * @return 解析后的声明体
+
      */
     public Claims parseToken(String token) {
         return Jwts.parser()
@@ -59,4 +82,28 @@ public class JwtUtils {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
+    // 辅助方法：检查令牌是否过期
+    private boolean isTokenExpired(Date expiration) {
+        return expiration.before(new Date());
+    }
+
+//黑名单
+    public void invalidateToken(String token) {
+        Claims claims = parseToken(token);
+        Date expiration = claims.getExpiration();
+        long ttl = expiration.getTime() - System.currentTimeMillis();
+
+        // 将未过期的token加入Redis黑名单
+        if(ttl > 0) {
+            redisTemplate.opsForValue().set(
+                    "jwt:blacklist:" + token,
+                    "invalid",
+                    ttl,
+                    TimeUnit.MILLISECONDS
+            );
+        }
+    }
+
+
 }

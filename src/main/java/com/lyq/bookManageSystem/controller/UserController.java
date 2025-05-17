@@ -11,10 +11,14 @@ import com.lyq.bookManageSystem.service.UserService;
 
 import com.lyq.bookManageSystem.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,10 +30,13 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @Autowired // 通过Spring自动注入
+    @Autowired
     private JwtUtils jwtUtils;
 
-//    获取用户列表
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    //    获取用户列表
     @GetMapping(value = "/getList")
     public ResponseResult getUserList(@RequestParam(defaultValue = "1") int pageNum,
                                       @RequestParam(defaultValue = "10") int pageSize,
@@ -75,7 +82,7 @@ public class UserController {
     public ResponseResult addUser(@RequestBody User user) {
         UserDTO exitUser = userService.getUserByUserName(user.getUserName());
         if(exitUser != null){
-            return ResponseResult.error(500, "用户名已经存在");
+            return ResponseResult.error( "用户名已经存在",500);
         }
           userService.addUser(user);
           return ResponseResult.success("成功",user);
@@ -93,7 +100,7 @@ public class UserController {
     public ResponseResult deleteUsers(@PathVariable String ids) {
         // 1. 参数校验
         if (ids == null || ids.trim().isEmpty()) {
-            return ResponseResult.error(400, "ID列表不能为空");
+            return ResponseResult.error( "ID列表不能为空",400);
         }
 
         // 2. 拆分并验证ID
@@ -113,7 +120,7 @@ public class UserController {
 
         // 3. 根据ID数量选择最优删除方式
         if (idList.isEmpty()) {
-            return ResponseResult.error(400, "未提供有效ID");
+            return ResponseResult.error( "未提供有效ID",400);
         } else if (idList.size() == 1) {
             // 单个删除（走更简单的逻辑）
             userService.deleteUserById(idList.get(0));
@@ -135,19 +142,32 @@ public class UserController {
         return ResponseResult.success("成功",userVO);
     }
 
-    @PostMapping(value = "/login")
-    public ResponseResult login(@RequestBody LoginQuery loginQuery) {
-
+    @PostMapping("/login")
+    public ResponseEntity<ResponseResult<?>> login(@RequestBody LoginQuery loginQuery) {
         UserDTO userDTO = userService.validateUser(loginQuery);
+        if (userDTO != null) {
+            String token = jwtUtils.generateToken(userDTO);
+            HashMap<String, Object> data = new HashMap<>();
+            data.put("token", token);  // 假设 token 是 String 类型
+            data.put("userName", userDTO.getUserName() );
 
-         if(userDTO != null){
-             String token = jwtUtils.generateToken(userDTO); // 生成JWT
-             return ResponseResult.success("登录成功", token);
+            ResponseResult<?> result = ResponseResult.success("登录成功", data);
+            return ResponseEntity.ok(result); // HTTP 200
+        } else {
+            ResponseResult<?> error = ResponseResult.error( "用户名或密码错误",1001);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error); // HTTP 401
+        }
+    }
 
-         } else{
-             return ResponseResult.error(400, "用户名或密码错误");
-         }
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseResult<?>> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7); // 去除Bearer前缀
+        jwtUtils.invalidateToken(token);
+        ResponseResult<?> result = ResponseResult.success("成功退出");
+        return ResponseEntity.ok(result);
 
     }
+
+
 
 }

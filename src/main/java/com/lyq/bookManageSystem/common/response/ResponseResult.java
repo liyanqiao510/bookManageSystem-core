@@ -31,7 +31,7 @@ public class ResponseResult<T> {
     @ApiModelProperty(value = "数据")
     private T data;
 
-    private static <T> ResponseResult<T> response(Integer code,   String message, T data) {
+    private static <T> ResponseResult<T> response( Integer code, String message,  T data) {
 
         ResponseResult<T> responseResult = new ResponseResult<>();
         responseResult.setCode(code);
@@ -40,8 +40,7 @@ public class ResponseResult<T> {
         return responseResult;
     }
 
-
-    private static <T> ResponseResult<T> response(Integer code, String message) {
+    private static <T> ResponseResult<T> response( Integer code, String message) {
 
         ResponseResult<T> responseResult = new ResponseResult<>();
         responseResult.setCode(code);
@@ -74,9 +73,14 @@ public class ResponseResult<T> {
     }
 
     //报错信息
-    public static <T> ResponseResult<T> error( Integer code,  String message) {
+    public static <T> ResponseResult<T> error(  String message, T data,  Integer code ) {
 
-        return response(code ,   message);
+        return response(code , message, data);
+    }
+
+    public static <T> ResponseResult<T> error(  String message,  Integer code) {
+
+        return response(code , message);
     }
 
 }

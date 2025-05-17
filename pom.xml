@@ -5,12 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
 
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.5.6</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>groupId</groupId>
@@ -23,10 +22,16 @@
 
     <dependencies>
 
+        <!-- 自动重启应用-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
 
 
@@ -35,14 +40,33 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-<!--        密码加密-->
+        <!--MySQL的驱动依赖-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <!-- 整合Redis-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- 连接池依赖（Spring Boot 2.x 需手动添加） -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+
+        <!-- 密码加密-->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
             <version>5.7.4</version>
         </dependency>
 
-<!--        jwt-->
+        <!-- jwt-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -61,8 +85,6 @@
             <scope>runtime</scope>
         </dependency>
 
-
-
         <!--SpringBoot整合MyBatis起步依赖-->
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
@@ -70,23 +92,19 @@
             <version>2.0.0</version>
         </dependency>
 
-        <!--MySQL的驱动依赖-->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-
+        <!--Lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.32</version> <!-- 2024年最新稳定版 -->
+            <version>1.18.32</version>
             <optional>true</optional>
         </dependency>
 
+        <!-- API 文档生成工具-->
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
-            <version>2.9.2</version> <!-- 最新版本为 2.10.5 -->
+            <version>2.9.2</version>
         </dependency>
 
         <!-- 分页插件-->
@@ -96,10 +114,12 @@
             <version>1.4.6</version>
         </dependency>
 
+
+
     </dependencies>
 
     <build>
-        <!--定义资源路径, 如 mapper.xml 写在java文件夹里 或静态资源文件夹里-->
+        <!--定义资源路径, java文件夹 和静态资源文件夹-->
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -114,6 +134,22 @@
                 </includes>
             </resource>
         </resources>
+
+        <!--  项目打包-->
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.5.6</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal> <!-- 关键：重新打包包含依赖 -->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
 
     </build>
 </project>

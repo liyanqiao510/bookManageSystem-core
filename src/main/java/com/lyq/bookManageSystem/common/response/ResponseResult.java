@@ -3,7 +3,6 @@ package com.lyq.bookManageSystem.common.response;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-//import net.javadog.common.enums.HttpStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -59,21 +58,21 @@ public class ResponseResult<T> {
     //成功信息
     public static <T> ResponseResult<T> success( String message, T data) {
 
-        return response(200,   message, data);
+        return response(20000,   message, data);
     }
 
     public static <T> ResponseResult<T> success( String message) {
 
-        return response(200,   message);
+        return response(20000,   message);
     }
 
     public static <T> ResponseResult<T> success() {
 
-        return response(200 );
+        return response(20000);
     }
 
     //报错信息
-    public static <T> ResponseResult<T> error(  String message, T data,  Integer code ) {
+    public static <T> ResponseResult<T> error(  String message,  Integer code, T data  ) {
 
         return response(code , message, data);
     }

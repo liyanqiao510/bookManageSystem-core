@@ -26,6 +26,17 @@ public class JwtUtils {
     @Value("${jwt.expiration}")
     private long expiration; // 过期时间（单位：秒）
 
+    @Value("${jwt.refresh-expiration}")
+    private long refreshExpiration;
+
+    public long getRefreshExpiration() {
+        return refreshExpiration;
+    }
+
+    public void setRefreshExpiration(long refreshExpiration) {
+        this.refreshExpiration = refreshExpiration;
+    }
+
     // 生成符合HS256算法的密钥
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secretStr.getBytes());
@@ -104,6 +115,43 @@ public class JwtUtils {
             );
         }
     }
+
+
+    // 生成Refresh Token
+    public String generateRefreshToken(UserDTO userDTO) {
+
+        return Jwts.builder()
+
+                .claim("sub", userDTO.getUserName())
+                .claim("type", "refresh") // 标记Token类型
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshExpiration * 1000))
+                .signWith(getSecretKey(), Jwts.SIG.HS256)
+                .compact();
+    }
+
+    // 新增Refresh Token验证方法
+    public boolean validateRefreshToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            return "refresh".equals(claims.get("type")) &&
+                    !isTokenExpired(claims.getExpiration());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 从JWT Claims中提取用户信息
+     */
+    public UserDTO extractUserFromClaims(Claims claims) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(claims.get("userId", Long.class));       // 从Claims获取用户ID
+        userDTO.setUserName(claims.getSubject());               // sub字段为用户名
+        userDTO.setRole(claims.get("role", Integer.class));     // 自定义角色字段
+        return userDTO;
+    }
+
 
 
 }

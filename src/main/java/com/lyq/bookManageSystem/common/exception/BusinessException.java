@@ -1,5 +1,7 @@
 package com.lyq.bookManageSystem.common.exception;
 
+import com.lyq.bookManageSystem.common.enums.BusinessErrorCode;
+
 public class BusinessException extends RuntimeException {
     private final int code;
     private final String message;
@@ -10,6 +12,12 @@ public class BusinessException extends RuntimeException {
         this.code = code;
         this.message = message;
     }
+
+    public BusinessException(BusinessErrorCode usernameExist) {
+        this.code = usernameExist.getCode();
+        this.message = usernameExist.getMessage();
+    }
+
 
     // Getter
     public int getCode() {

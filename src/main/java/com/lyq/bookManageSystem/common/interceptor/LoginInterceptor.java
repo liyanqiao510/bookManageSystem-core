@@ -31,7 +31,7 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         // 1. 获取请求路径并处理白名单
         String uri = request.getRequestURI();
-        if (uri.contains("/login") || uri.contains("/static/")) {
+        if (uri.contains("/login") || uri.contains("/logout") || uri.contains("/refresh")  || uri.contains("/static/")) {
             return true; // 推荐使用精确路径匹配
         }
 
@@ -50,10 +50,7 @@ public class LoginInterceptor implements HandlerInterceptor {
                 return false;
             }
         }
-//        catch (ExpiredJwtException e) {
-//            sendJsonError(response, 401, "令牌已过期");
-//            return false;
-//        }
+
         catch (JwtException | IllegalArgumentException e) {
             sendJsonError(response, 401, "令牌解析失败");
             return false;

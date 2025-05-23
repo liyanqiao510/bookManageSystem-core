@@ -18,10 +18,7 @@ public interface UserService {
     //更新用户
     void updateUser(Long id, User user);
 
-    //删除用户
-    void deleteUserById(Long id);
-
-    void deleteAllById(List<Long> ids);
+    int deleteUser(String ids);
 
     //id查找用户
     UserDTO getUserById(Long id);

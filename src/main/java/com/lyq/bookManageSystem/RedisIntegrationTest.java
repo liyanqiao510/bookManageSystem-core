@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -15,6 +18,16 @@ public class RedisIntegrationTest {
     private RedisTemplate<String, Object> redisTemplate; // 使用自定义的 RedisTemplate
 
 
+
+    @Test
+    public void testRedis() {
+        Set<String> keys = redisTemplate.keys("jwt:*");  // 查看以jwt:开头的键
+        for (String key : keys) {
+            System.out.println("token键");
+            System.out.println(key);  // 打印每个键
+        }
+
+    }
 
     @Test
     public void testRedisConnection() {

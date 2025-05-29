@@ -1,5 +1,7 @@
 package com.lyq.bookManageSystem.common.interceptor;
 
+import com.lyq.bookManageSystem.common.enums.BusinessErrorCode;
+import com.lyq.bookManageSystem.common.exception.BusinessException;
 import com.lyq.bookManageSystem.util.JwtUtils;
 import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,46 +20,44 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Autowired
     JwtUtils jwtUtils;
 
-    @Override
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) throws Exception {
-        // 0. 放行OPTIONS预检请求
-        // 避免拦截预检请求
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            response.setStatus(HttpStatus.OK.value());
-            return true;
-        }
-
-        // 1. 获取请求路径并处理白名单
-        String uri = request.getRequestURI();
-        if (uri.contains("/login") || uri.contains("/logout") || uri.contains("/refresh")  || uri.contains("/static/")) {
-            return true; // 推荐使用精确路径匹配
-        }
-
-        // 2. 提取并验证JWT令牌
-        String tokenHeader = request.getHeader("Authorization");
-        System.out.println("tokenHeader:=="+tokenHeader);
-        if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")) {
-            sendJsonError(response, 401, "Authorization头缺失或格式错误");
-            return false;
-        }
-
-        String token = tokenHeader.substring(7).trim();
-        try {
-            if (!jwtUtils.validateToken(token)) { // 需包含签名+有效期验证
-                sendJsonError(response, 401, "令牌无效或已过期");
-                return false;
-            }
-        }
-
-        catch (JwtException | IllegalArgumentException e) {
-            sendJsonError(response, 401, "令牌解析失败");
-            return false;
-        }
-
-        return true;
-    }
+//    @Override
+//    public boolean preHandle(HttpServletRequest request,
+//                             HttpServletResponse response,
+//                             Object handler) throws Exception {
+//        // 0. 放行OPTIONS预检请求
+//        // 避免拦截预检请求
+//        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+//            response.setStatus(HttpStatus.OK.value());
+//            return true;
+//        }
+//
+//        // 1. 获取请求路径并处理白名单
+//        String uri = request.getRequestURI();
+//        if (uri.contains("/login") || uri.contains("/logout") || uri.contains("/refresh")  || uri.contains("/static/")) {
+//            return true; // 推荐使用精确路径匹配
+//        }
+//
+//        // 2. 提取并验证JWT令牌
+//        String tokenHeader = request.getHeader("Authorization");
+//        System.out.println("tokenHeader:=="+tokenHeader);
+//        if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")) {
+//        throw new BusinessException(BusinessErrorCode.MISSING_AUTHORIZATION_HEADER);
+//        }
+//
+//        String token = tokenHeader.substring(7).trim();
+//        try {
+//            if (!jwtUtils.validateToken(token)) { // 需包含签名+有效期验证
+//                sendJsonError(response, 401, "令牌无效或已过期");
+//                return false;
+//            }
+//        }
+//
+//        catch (JwtException | IllegalArgumentException e) {
+//            throw new BusinessException(BusinessErrorCode.TOKEN_PARSING_FAILED);
+//        }
+//
+//        return true;
+//    }
 
 
     // 辅助方法：返回JSON格式错误

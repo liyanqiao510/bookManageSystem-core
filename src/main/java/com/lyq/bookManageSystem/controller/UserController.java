@@ -1,6 +1,8 @@
 package com.lyq.bookManageSystem.controller;
 
 import com.github.pagehelper.PageInfo;
+import com.lyq.bookManageSystem.common.enums.BusinessErrorCode;
+import com.lyq.bookManageSystem.common.exception.BusinessException;
 import com.lyq.bookManageSystem.model.DTO.UserDTO;
 import com.lyq.bookManageSystem.model.VO.UserVO;
 import com.lyq.bookManageSystem.common.response.ResponseResult;
@@ -43,7 +45,7 @@ public class UserController {
 
     //    获取用户列表
     @GetMapping(value = "/getList")
-    public ResponseResult getUserList(@RequestParam(defaultValue = "1") int pageNum,
+    public ResponseEntity<ResponseResult<?>> getUserList(@RequestParam(defaultValue = "1") int pageNum,
                                       @RequestParam(defaultValue = "10") int pageSize,
                                       @RequestParam(required = false) Long id,
                                       @RequestParam(required = false) String userName,
@@ -56,7 +58,9 @@ public class UserController {
         // 转换为VO类 分页数据
         PageInfo<UserVO> voPage = convertPage(users);
 
-        return ResponseResult.success("获取用户列表成功",voPage);
+        ResponseResult response = ResponseResult.success("获取用户列表成功",voPage);
+
+        return ResponseEntity.ok(response) ;
     }
 
     // 分页对象转换方法
@@ -79,28 +83,31 @@ public class UserController {
 
 //  新增用户
     @PostMapping(value = "/add")
-    public ResponseResult addUser(@RequestBody User user) {
+    public ResponseEntity<ResponseResult<?>> addUser(@RequestBody User user) {
         userService.addUser(user);
-
-          return ResponseResult.success("新增用户成功",user);
+        ResponseResult response = ResponseResult.success("新增用户成功",user);
+          return ResponseEntity.ok(response);
     }
 
 //  更新用户信息
     @PutMapping(value = "/update/{id}")
-    public ResponseResult updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<ResponseResult<?>> updateUser(@PathVariable Long id, @RequestBody User user) {
           userService.updateUser(id, user);
-          return ResponseResult.success("修改用户信息成功",user);
+        ResponseResult response = ResponseResult.success("修改用户信息成功",user);
+          return ResponseEntity.ok(response);
     }
 
   //单个或批量删除
     @DeleteMapping("/delete/{ids}")
     @Transactional
-    public ResponseResult deleteUsers(@PathVariable String ids) {
+    public ResponseEntity<ResponseResult<?>> deleteUsers(@PathVariable String ids) {
 
 
         int deleteCount = userService.deleteUser(ids);
 
-        return ResponseResult.success("成功删除 " + deleteCount + " 个用户", null);
+        ResponseResult response = ResponseResult.success("成功删除 " + deleteCount + " 个用户", null);
+
+        return ResponseEntity.ok(response);
     }
 
     //  根据id查找用户
@@ -116,7 +123,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<ResponseResult<?>> login(@RequestBody LoginQuery loginQuery) {
         UserDTO userDTO = userService.validateUser(loginQuery);
-        if (userDTO != null) {
+
+        if (userDTO != null ) {
+            if(userDTO.getIsLocked() == true){ //验证账号是否被锁定
+                throw new BusinessException(BusinessErrorCode.ACCOUNT_LOCKED);
+            }
             //用于验证的token
             String token = jwtUtils.generateToken(userDTO);
             HashMap<String, Object> data = new HashMap<>();
@@ -144,13 +155,12 @@ public class UserController {
                     .path("/")
                     .build();
 
-                ResponseResult<?> result = ResponseResult.success("登录成功", data);
+                ResponseResult<?> result = ResponseResult.success( "登录成功", data);
                 return ResponseEntity.ok()
                         .header(HttpHeaders.SET_COOKIE, cookie.toString())
                         .body(result);
         } else {
-            ResponseResult<?> error = ResponseResult.error( "用户名或密码错误",1001);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error); //  认证失败
+            throw new BusinessException(BusinessErrorCode.USERNAME_OR_PWD_ERROR);
         }
     }
 

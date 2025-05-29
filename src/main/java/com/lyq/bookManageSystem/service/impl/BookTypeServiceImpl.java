@@ -3,41 +3,37 @@ package com.lyq.bookManageSystem.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lyq.bookManageSystem.common.enums.BusinessErrorCode;
-import com.lyq.bookManageSystem.common.response.ResponseResult;
-import com.lyq.bookManageSystem.model.DTO.UserDTO;
-import com.lyq.bookManageSystem.converter.UserConverter;
-import com.lyq.bookManageSystem.model.entity.User;
 import com.lyq.bookManageSystem.common.exception.BusinessException;
-import com.lyq.bookManageSystem.model.query.LoginQuery;
-import com.lyq.bookManageSystem.mapper.UserMapper;
-import com.lyq.bookManageSystem.service.UserService;
 
-
+import com.lyq.bookManageSystem.mapper.BookTypeMapper;
+import com.lyq.bookManageSystem.model.DTO.BookTypeDTO;
+import com.lyq.bookManageSystem.model.entity.BookType;
+import com.lyq.bookManageSystem.service.BookTypeService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 @Service
-public class UserServiceImpl implements UserService {
+public class BookTypeServiceImpl implements BookTypeService {
 
     @Resource
-    private UserMapper userMapper;
+    private BookTypeMapper bookTypeMapper;
 
     @Override
-    public PageInfo<UserDTO> getUserList(int pageNum, int pageSize, Long id, String userName, String name, Integer role, Boolean isLocked) {
+    public PageInfo<BookTypeDTO> getBookTypeList(int pageNum, int pageSize, Long id, String typeName ) {
         //  特殊情况修正
         pageNum = Math.max(pageNum, 1);          // 处理页码负数
         pageSize = Math.max(pageSize, 1);        // 处理每页大小负数
         pageSize = Math.min(pageSize, 100);      // 每页最多100条
 
-        Integer totalCount = userMapper.getTotal(id, userName, name, role, isLocked);
+        Integer totalCount = bookTypeMapper.getTotal(id, typeName );
 
         Integer totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
@@ -50,37 +46,31 @@ public class UserServiceImpl implements UserService {
         // 1. 启动分页
         PageHelper.startPage(pageNum, pageSize);
 
-        // 2. 执行查询（返回的是 UserDO 列表）
-        List<User> userList = userMapper.selectList(id, userName, name, role, isLocked);
+        List<BookType> bookTypeList = bookTypeMapper.selectList(id, typeName  );
 
-        // 3. 将 List<UserDO> 转换为 List<UserDTO>
-        List<UserDTO> userDTOList = userList.stream()
-                .map(UserConverter::toDTO)  // 使用转换器
-                .collect(Collectors.toList());
+        List<BookTypeDTO> dtoList = new ArrayList<>();
+        for (BookType bookType : bookTypeList) {
+            BookTypeDTO dto = new BookTypeDTO();
+            BeanUtils.copyProperties(bookType, dto);
+            dtoList.add(dto);
+        }
 
-        // 4. 获取分页信息（PageHelper 自动生成）
-        PageInfo<User> pageInfo = new PageInfo<>(userList);
+        PageInfo<BookType> pageInfo = new PageInfo<>(bookTypeList);
 
-        // 5. 构造新的 PageInfo<UserDTO>（保留分页数据）
-        PageInfo<UserDTO> dtoPageInfo = new PageInfo<>();
+        PageInfo<BookTypeDTO> dtoPageInfo = new PageInfo<>();
         BeanUtils.copyProperties(pageInfo, dtoPageInfo); // 拷贝分页元数据
-        dtoPageInfo.setList(userDTOList);                // 替换为 DTO 列表
+        dtoPageInfo.setList(dtoList);                // 替换为 DTO 列表
 
         return dtoPageInfo;
     }
 
     @Override
     @Transactional
-    public void addUser(User user) {
-        User exitUser = userMapper.selectUserByUserName(user.getUserName());
-        if(exitUser != null){
-            throw new BusinessException(BusinessErrorCode.USERNAME_EXIST);
-        }
+    public void addBookType(BookTypeDTO bookTypeDTO) {
+        BookType bookType = new BookType();
+        BeanUtils.copyProperties(bookTypeDTO, bookType);
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashedPassword = encoder.encode("Cs123456");
-        user.setPassword(hashedPassword);
-        int rows = userMapper.insertUser(user);
+        int rows = bookTypeMapper.insert(bookType);
         // 执行插入
         if (rows != 1) {
             throw new BusinessException(BusinessErrorCode.USER_CREATE_FAILED);
@@ -90,9 +80,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUser(Long id, User user) {
-        user.setId(id);
-       int rows =  userMapper.updateUser(user);
+    public void updateBookType(Long id, BookTypeDTO bookTypeDTO) {
+
+        bookTypeDTO.setId(id);
+        BookType bookType = new BookType();
+        BeanUtils.copyProperties(bookTypeDTO, bookType);
+
+       int rows =  bookTypeMapper.update(bookType);
         if (rows != 1) {
             throw new BusinessException(BusinessErrorCode.USER_UPDATE_FAILED);
         }
@@ -101,9 +95,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int deleteUser(String ids) {
-        int rows = 0;
+    public int deleteBookType(String ids) {
 
+        int rows = 0;
         // 1. 参数校验
         if (ids == null || ids.trim().isEmpty()) {
             throw new BusinessException(BusinessErrorCode.ID_LIST_EMPTY);
@@ -132,16 +126,16 @@ public class UserServiceImpl implements UserService {
         } else if (idList.size() > 100) {
             throw new BusinessException(BusinessErrorCode.INVALID_ID);
 
-        } else if (idList.size() == 1) {
+        }  else if (idList.size() == 1) {
             // 单个删除（走更简单的逻辑）
-            rows = userMapper.deleteUserById(idList.get(0));
+            rows = bookTypeMapper.deleteById(idList.get(0));
             if (rows != 1) {
                 throw new BusinessException(BusinessErrorCode.USER_DELETE_FAILED);
             }
 
         } else {
             // 批量删除
-            rows = userMapper.deleteAllById(idList);
+            rows = bookTypeMapper.deleteAllById(idList);
             if (rows != idList.size()) {
                 throw new BusinessException(BusinessErrorCode.USER_DELETE_FAILED);
             }
@@ -151,35 +145,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO getUserById(Long id) {
+    public BookTypeDTO getBookTypeById(Long id) {
+        BookType bookType = bookTypeMapper.selectById(id);
+        BookTypeDTO dto = new BookTypeDTO();
+        BeanUtils.copyProperties(bookType, dto);
 
-       return UserConverter.toDTO(userMapper.selectUserById(id)) ;
-
-    }
-
-
-    @Override
-    public UserDTO getUserByUserName(String userName) {
-        User user = userMapper.selectUserByUserName(userName);
-        return user == null ? null : UserConverter.toDTO(user);
-    }
-
-    @Override
-    public UserDTO validateUser(LoginQuery loginQuery) {
-        User user = userMapper.selectUserByUserName(loginQuery.getUserName());
-        if(user == null){
-            return null; // 用户名不存在
-        }else{
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            if (encoder.matches(loginQuery.getPassword(), user.getPassword())) {
-                return UserConverter.toDTO(user); // 验证成功
-            }else{
-                return null;   // 验证失败
-            }
-        }
-
+       return dto  ;
 
     }
+
 
 
 }

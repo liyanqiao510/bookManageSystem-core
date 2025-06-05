@@ -16,7 +16,5 @@ public class BookTypeDTO {
     private String typeName;
     private String typeDesc;
 
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
 
 }

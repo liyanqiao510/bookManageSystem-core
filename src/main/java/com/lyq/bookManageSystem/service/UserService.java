@@ -13,10 +13,10 @@ public interface UserService {
     PageInfo<UserDTO> getUserList(int pageNum, int pageSize, Long id, String userName, String name, Integer role, Boolean isLocked);
 
     //新增用户
-    void addUser(User user);
+    void addUser(UserDTO userDTO);
 
     //更新用户
-    void updateUser(Long id, User user);
+    void updateUser(Long id, UserDTO userDTO);
 
     int deleteUser(String ids);
 

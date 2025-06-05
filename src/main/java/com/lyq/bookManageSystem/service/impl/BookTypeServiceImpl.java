@@ -154,6 +154,21 @@ public class BookTypeServiceImpl implements BookTypeService {
 
     }
 
+    @Override
+    public List<BookTypeDTO> getBookTypeAll() {
+       List<BookType> bookTypes = bookTypeMapper.selectAll();
+
+        List<BookTypeDTO> dtoList = new ArrayList<>();
+        for(BookType b : bookTypes){
+            BookTypeDTO dto = new BookTypeDTO();
+            BeanUtils.copyProperties(b, dto);
+            dtoList.add(dto);
+        }
+
+
+        return dtoList  ;
+
+    }
 
 
 }

@@ -92,6 +92,7 @@ public class JwtUtils {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+
     }
 
     // 辅助方法：检查令牌是否过期
@@ -144,7 +145,8 @@ public class JwtUtils {
     /**
      * 从JWT Claims中提取用户信息
      */
-    public UserDTO extractUserFromClaims(Claims claims) {
+    public UserDTO extractUserFromClaims(String token) {
+        Claims claims = parseToken(token);
         UserDTO userDTO = new UserDTO();
         userDTO.setId(claims.get("userId", Long.class));       // 从Claims获取用户ID
         userDTO.setUserName(claims.getSubject());               // sub字段为用户名

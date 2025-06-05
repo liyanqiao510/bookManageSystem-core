@@ -8,11 +8,10 @@ C：第三方服务错误（如CDN故障）
  */
 
 public enum BusinessErrorCode {
-//    SUCCESS         (20000,  "操作成功"),
-    // 客户端错误（4xx语义，编码2开头）
-    USERNAME_EXIST         (20001,  "用户名已经存在", HttpStatus.OK.value()),
-    ID_LIST_EMPTY          (20002, "ID列表不能为空", HttpStatus.OK.value()),
-    INVALID_ID             (20003,  "未提供有效ID", HttpStatus.OK.value()),
+
+    USERNAME_EXIST         (20001,  "用户名已经存在", HttpStatus.BAD_REQUEST.value()),
+    ID_LIST_EMPTY          (20002, "ID列表不能为空", HttpStatus.BAD_REQUEST.value()),
+    INVALID_ID             (20003,  "未提供有效ID", HttpStatus.BAD_REQUEST.value()),
 
     ID_MUST_BE_POSITIVE(40001, "ID必须为正数",HttpStatus.BAD_REQUEST.value()),
     INVALID_ID_FORMAT(40002, "无效的ID格式",HttpStatus.BAD_REQUEST.value()),
@@ -21,10 +20,9 @@ public enum BusinessErrorCode {
     MISSING_AUTHORIZATION_HEADER(40005, "Authorization头缺失或格式错误",HttpStatus.UNAUTHORIZED.value()),
     TOKEN_PARSING_FAILED(40006, "令牌解析失败",HttpStatus.UNAUTHORIZED.value()),
 
-    // 服务端错误（5xx语义，编码5开头）
-    USER_CREATE_FAILED     (50001,  "用户创建失败", HttpStatus.INTERNAL_SERVER_ERROR.value()),
-    USER_UPDATE_FAILED     (50002,  "用户更新失败", HttpStatus.INTERNAL_SERVER_ERROR.value()),
-    USER_DELETE_FAILED     (50003, "用户删除失败", HttpStatus.INTERNAL_SERVER_ERROR.value());
+    USER_CREATE_FAILED     (50001,  "新增失败", HttpStatus.INTERNAL_SERVER_ERROR.value()),
+    USER_UPDATE_FAILED     (50002,  "修改失败或无需修改", HttpStatus.INTERNAL_SERVER_ERROR.value()),
+    USER_DELETE_FAILED     (50003, "删除失败或已被删除", HttpStatus.INTERNAL_SERVER_ERROR.value());
 
     private final int code; // 业务状态码（5位）
     private final String message;   // 错误描述

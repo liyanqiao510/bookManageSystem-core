@@ -92,7 +92,11 @@
         </foreach>
     </delete>
 
-
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from book_type
+    </select>
 
 
 </mapper>

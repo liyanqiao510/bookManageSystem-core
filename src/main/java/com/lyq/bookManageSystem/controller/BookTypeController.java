@@ -33,12 +33,12 @@ public class BookTypeController {
                                       @RequestParam(required = false) @Positive Long id,
                                       @RequestParam(required = false) String typeName ) {
 
-        PageInfo<BookTypeDTO> booktype = bookTypeService.getBookTypeList( pageNum,pageSize, id, typeName );
+        PageInfo<BookTypeDTO> bookType = bookTypeService.getBookTypeList( pageNum,pageSize, id, typeName );
 
         // 转换为VO类 分页数据
-        PageInfo<BookTypeVO> voPage = convertPage(booktype);
+        PageInfo<BookTypeVO> voPage = convertPage(bookType);
 
-        ResponseResult response = ResponseResult.success("获取列表成功",voPage);
+        ResponseResult response = ResponseResult.success(voPage);
 
         return ResponseEntity.ok(response) ;
     }
@@ -92,6 +92,16 @@ public class BookTypeController {
         int deleteCount = bookTypeService.deleteBookType(ids);
 
         ResponseResult response = ResponseResult.success("成功删除 " + deleteCount + " 个", null);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<ResponseResult<?>> getAll() {
+
+        List<BookTypeDTO> bookTypeDTO = bookTypeService.getBookTypeAll();
+
+        ResponseResult response = ResponseResult.success(bookTypeDTO);
 
         return ResponseEntity.ok(response);
     }

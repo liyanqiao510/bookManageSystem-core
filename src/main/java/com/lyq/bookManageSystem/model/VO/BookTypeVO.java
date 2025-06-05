@@ -13,7 +13,6 @@ public class BookTypeVO {
     private Long id;
     private String typeName;
     private String typeDesc;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
+
 
 }

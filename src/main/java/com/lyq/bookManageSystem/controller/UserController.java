@@ -23,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +48,9 @@ public class UserController {
 
     //    获取用户列表
     @GetMapping(value = "/getList")
-    public ResponseEntity<ResponseResult<?>> getUserList(@RequestParam(defaultValue = "1") int pageNum,
-                                      @RequestParam(defaultValue = "10") int pageSize,
-                                      @RequestParam(required = false) Long id,
+    public ResponseEntity<ResponseResult<?>> getUserList(@RequestParam(defaultValue = "1") @Min(1) int pageNum,
+                                      @RequestParam(defaultValue = "10") @Min(1) int pageSize,
+                                      @RequestParam(required = false) @Positive Long id,
                                       @RequestParam(required = false) String userName,
                                       @RequestParam(required = false) String name,
                                       @RequestParam(required = false) Integer role,
@@ -58,7 +61,7 @@ public class UserController {
         // 转换为VO类 分页数据
         PageInfo<UserVO> voPage = convertPage(users);
 
-        ResponseResult response = ResponseResult.success("获取用户列表成功",voPage);
+        ResponseResult response = ResponseResult.success(voPage);
 
         return ResponseEntity.ok(response) ;
     }
@@ -83,17 +86,17 @@ public class UserController {
 
 //  新增用户
     @PostMapping(value = "/add")
-    public ResponseEntity<ResponseResult<?>> addUser(@RequestBody User user) {
-        userService.addUser(user);
-        ResponseResult response = ResponseResult.success("新增用户成功",user);
+    public ResponseEntity<ResponseResult<?>> addUser(@Valid @RequestBody UserDTO userDTO) {
+        userService.addUser(userDTO);
+        ResponseResult response = ResponseResult.success("新增用户成功",userDTO);
           return ResponseEntity.ok(response);
     }
 
 //  更新用户信息
     @PutMapping(value = "/update/{id}")
-    public ResponseEntity<ResponseResult<?>> updateUser(@PathVariable Long id, @RequestBody User user) {
-          userService.updateUser(id, user);
-        ResponseResult response = ResponseResult.success("修改用户信息成功",user);
+    public ResponseEntity<ResponseResult<?>> updateUser(@PathVariable @Min(1) Long id, @Valid @RequestBody UserDTO userDTO) {
+          userService.updateUser(id, userDTO);
+        ResponseResult response = ResponseResult.success("修改用户信息成功",userDTO);
           return ResponseEntity.ok(response);
     }
 
@@ -171,7 +174,7 @@ public class UserController {
 
         //加入JWT到Redis黑名单
         jwtUtils.invalidateToken(token);
-        ResponseResult<?> result = ResponseResult.success("退出登录成功");
+        ResponseResult<?> result = ResponseResult.success("用户退出登录");
         return ResponseEntity.ok(result);
 
     }
@@ -187,15 +190,12 @@ public class UserController {
 
         // 2. 检查Redis中的Token匹配
         Claims claims = jwtUtils.parseToken(refreshToken);
-        System.out.println("claims的值是:"+claims);
         String redisKey = "refresh:" + claims.get("sub");
         if (!redisTemplate.hasKey(redisKey)) {
             return ResponseEntity.status(403).body("RefreshToken已失效或未存储");
         }
 
         String redisToken = (String) redisTemplate.opsForValue().get("refresh:" + claims.get("sub"));
-        System.out.println("redisToken的值是:"+redisToken);
-        System.out.println("请求refreshToken的值是:"+refreshToken);
         if (!refreshToken.equals(redisToken)) {
             return ResponseEntity.status(403).body("RefreshToken不匹配");
         }

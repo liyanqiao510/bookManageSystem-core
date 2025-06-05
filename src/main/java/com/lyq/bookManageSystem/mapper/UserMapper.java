@@ -27,15 +27,15 @@ public interface UserMapper {
     int updateUser(User user);
 
     //删除用户 根据id
-    int deleteUserById(Long id);
+    int deleteUserById(@Param("id") Long id);
 
     int deleteAllById(@Param("ids") List<Long> ids);
 
     //id查找用户
-    User selectUserById(Long id);
+    User selectUserById(@Param("id") Long id);
 
     //用户名查找用户
-    User selectUserByUserName(String userName);
+    User selectUserByUserName(@Param("userName") String userName);
 
 
 

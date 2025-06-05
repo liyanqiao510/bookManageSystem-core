@@ -6,6 +6,7 @@ import com.lyq.bookManageSystem.common.enums.BusinessErrorCode;
 import com.lyq.bookManageSystem.common.response.ResponseResult;
 import com.lyq.bookManageSystem.model.DTO.UserDTO;
 import com.lyq.bookManageSystem.converter.UserConverter;
+import com.lyq.bookManageSystem.model.entity.BookType;
 import com.lyq.bookManageSystem.model.entity.User;
 import com.lyq.bookManageSystem.common.exception.BusinessException;
 import com.lyq.bookManageSystem.model.query.LoginQuery;
@@ -71,7 +72,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void addUser(User user) {
+    public void addUser(UserDTO userDTO) {
+        User user = new User();
+        BeanUtils.copyProperties(userDTO, user);
+
         User exitUser = userMapper.selectUserByUserName(user.getUserName());
         if(exitUser != null){
             throw new BusinessException(BusinessErrorCode.USERNAME_EXIST);
@@ -90,8 +94,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUser(Long id, User user) {
-        user.setId(id);
+    public void updateUser(Long id, UserDTO userDTO) {
+        userDTO.setId(id);
+        User user = new User();
+        BeanUtils.copyProperties(userDTO, user);
+
        int rows =  userMapper.updateUser(user);
         if (rows != 1) {
             throw new BusinessException(BusinessErrorCode.USER_UPDATE_FAILED);

@@ -4,6 +4,8 @@ import com.github.pagehelper.PageInfo;
 import com.lyq.bookManageSystem.model.DTO.BookTypeDTO;
 import com.lyq.bookManageSystem.model.entity.BookType;
 
+import java.util.List;
+
 
 public interface BookTypeService {
 
@@ -17,7 +19,7 @@ public interface BookTypeService {
 
     BookTypeDTO getBookTypeById(Long id);
 
-
+    List<BookTypeDTO> getBookTypeAll();
 
 
 }

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lyq.bookManageSystem.mapper.BookMapper">
+    <resultMap id="BaseResultMap" type="com.lyq.bookManageSystem.model.entity.Book">
+        <id column="id" jdbcType="INTEGER" property="id" />
+
+        <result column="book_name" jdbcType="VARCHAR" property="bookName" />
+        <result column="book_author" jdbcType="VARCHAR" property="bookAuthor" />
+
+        <result column="book_price" jdbcType="DECIMAL" property="bookPrice" />
+        <result column="book_type_id" jdbcType="INTEGER" property="bookTypeId" />
+
+        <result column="book_desc" jdbcType="VARCHAR" property="bookDesc" />
+        <result column="is_borrowed" jdbcType="TINYINT" property="isBorrowed" />
+        <result column="book_img" jdbcType="VARCHAR" property="bookImg" />
+
+
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, book_name, book_author,book_price,book_type_id,book_desc,is_borrowed,book_img
+    </sql>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from book
+        <where>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="bookName != null and bookName != ''">
+                AND book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+            <if test="bookAuthor != null and bookAuthor != ''">
+                AND book_author LIKE CONCAT('%', #{bookAuthor}, '%')
+            </if>
+            <if test="bookTypeId != null">
+                AND book_type_id = #{bookTypeId}
+            </if>
+            <if test="isBorrowed != null">
+                AND is_borrowed = #{isBorrowed}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="getTotal" resultType="INTEGER">
+        select COUNT(*)
+        from book
+        <where>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="bookName != null and bookName != ''">
+                AND book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+            <if test="bookAuthor != null and bookAuthor != ''">
+                AND book_author LIKE CONCAT('%', #{bookAuthor}, '%')
+            </if>
+            <if test="bookTypeId != null">
+                AND book_type_id = #{bookTypeId}
+            </if>
+            <if test="isBorrowed != null">
+                AND is_borrowed = #{isBorrowed}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from book where id = #{id}
+    </select>
+
+    <select id="selectByName" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from book where book_name = #{bookName}
+    </select>
+
+
+
+    <insert id="insert" parameterType="com.lyq.bookManageSystem.model.entity.Book">
+        insert into book
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="bookName != null">book_name,</if>
+                <if test="bookAuthor != null">book_author,</if>
+                <if test="bookPrice != null">book_price,</if>
+                <if test="bookTypeId != null">book_type_id,</if>
+                <if test="bookDesc != null">book_desc,</if>
+                <if test="isBorrowed != null">is_borrowed,</if>
+                <if test="bookImg != null">book_img,</if>
+            </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="bookName != null">#{bookName,jdbcType=VARCHAR},</if>
+            <if test="bookAuthor != null"> #{bookAuthor,jdbcType=VARCHAR}, </if>
+            <if test="bookPrice != null">   #{bookPrice,jdbcType=DECIMAL}, </if>
+            <if test="bookTypeId != null">  #{bookTypeId,jdbcType=INTEGER},  </if>
+            <if test="bookDesc != null">  #{bookDesc,jdbcType=VARCHAR},    </if>
+            <if test="isBorrowed != null">      #{isBorrowed,jdbcType=TINYINT},  </if>
+            <if test="bookImg != null">      #{bookImg,jdbcType=VARCHAR},   </if>
+
+
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.lyq.bookManageSystem.model.entity.Book">
+        update book
+        <set>
+            <if test="bookName!=null">book_name=#{bookName},</if>
+            <if test="bookAuthor!=null">book_author=#{bookAuthor},</if>
+            <if test="bookPrice!=null">book_price=#{bookPrice},</if>
+            <if test="bookTypeId!=null">book_type_id=#{bookTypeId},</if>
+            <if test="bookDesc!=null">book_desc=#{bookDesc},</if>
+            <if test="isBorrowed!=null">is_borrowed=#{isBorrowed},</if>
+            <if test="bookImg!=null">book_img=#{bookImg},</if>
+
+        </set>
+        where id=#{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+       delete from book where  id=#{id,jdbcType=INTEGER}
+    </delete>
+
+    <delete id="deleteAllById">
+        DELETE FROM book WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id,jdbcType=INTEGER}
+        </foreach>
+    </delete>
+
+
+
+
+</mapper>

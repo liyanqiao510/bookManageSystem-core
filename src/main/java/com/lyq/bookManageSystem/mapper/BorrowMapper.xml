@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lyq.bookManageSystem.mapper.BorrowMapper">
+    <resultMap id="BaseResultMap" type="com.lyq.bookManageSystem.model.entity.Borrow">
+        <id column="id" jdbcType="INTEGER" property="id" />
+
+        <result column="user_id" jdbcType="INTEGER" property="userId" />
+        <result column="book_id" jdbcType="INTEGER" property="bookId" />
+
+        <result column="user_name" jdbcType="VARCHAR" property="userName" />
+        <result column="book_name" jdbcType="VARCHAR" property="bookName" />
+
+        <result column="borrow_time" jdbcType="TIMESTAMP" property="borrowTime" />
+        <result column="return_time" jdbcType="TIMESTAMP" property="returnTime" />
+
+
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, book_id, user_name, book_name, borrow_time, return_time
+    </sql>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        select
+        borrow.id ,
+        borrow.user_id,
+        borrow.book_id,
+        borrow.borrow_time,
+        borrow.return_time,
+        user.user_name,
+        book.book_name
+        from borrow join user on borrow.user_id = user.id
+                                     join book on borrow.book_id = book.id
+        <where>
+            <if test="id != null">
+                AND borrow.id = #{id}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND user.user_name LIKE CONCAT('%', #{userName}, '%')
+            </if>
+            <if test="bookName != null and bookName != ''">
+                AND book.book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+            <if test="borrowRange != null and borrowRange.length == 2">
+                AND borrow.borrow_time BETWEEN #{borrowRange[0]} AND #{borrowRange[1]}
+            </if>
+            <if test="returnRange != null and returnRange.length == 2">
+                AND borrow.return_time BETWEEN #{returnRange[0]} AND #{returnRange[1]}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="getTotal" resultType="INTEGER">
+        select COUNT(*)
+        from borrow join user on borrow.user_id = user.id
+        join book on borrow.book_id = book.id
+        <where>
+            <if test="id != null">
+                AND borrow.id = #{id}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND user_name LIKE CONCAT('%', #{userName}, '%')
+            </if>
+            <if test="bookName != null and bookName != ''">
+                AND book_name LIKE CONCAT('%', #{bookName}, '%')
+            </if>
+            <if test="borrowRange != null and borrowRange.length == 2">
+                AND borrow.borrow_time BETWEEN #{borrowRange[0]} AND #{borrowRange[1]}
+            </if>
+            <if test="returnRange != null and returnRange.length == 2">
+                AND borrow.return_time BETWEEN #{returnRange[0]} AND #{returnRange[1]}
+            </if>
+
+
+        </where>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        select
+            borrow.id ,
+            borrow.user_id,
+            borrow.book_id,
+            borrow.borrow_time,
+            borrow.return_time,
+            user.user_name,
+            book.book_name
+        from borrow join user on borrow.user_id = user.id
+                    join book on borrow.book_id = book.id
+        where borrow.id = #{id}
+    </select>
+
+
+
+    <insert id="insert" parameterType="com.lyq.bookManageSystem.model.entity.Borrow">
+        insert into borrow
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="userId != null">user_id,</if>
+                <if test="bookId != null">book_id,</if>
+                <if test="borrowTime != null">borrow_time,</if>
+                <if test="returnTime != null">return_time,</if>
+            </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId,jdbcType=INTEGER},</if>
+            <if test="bookId != null"> #{bookId,jdbcType=INTEGER}, </if>
+            <if test="borrowTime != null">   #{borrowTime,jdbcType=TIMESTAMP}, </if>
+            <if test="returnTime != null">  #{returnTime,jdbcType=TIMESTAMP},  </if>
+
+
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.lyq.bookManageSystem.model.entity.Borrow">
+        update borrow
+        <set>
+            <if test="userId!=null">user_id=#{userId},</if>
+            <if test="bookId!=null">book_id=#{bookId},</if>
+            <if test="borrowTime!=null">borrow_time=#{borrowTime},</if>
+            <if test="returnTime!=null">return_time=#{returnTime},</if>
+
+        </set>
+        where id=#{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+       delete from borrow where  id=#{id,jdbcType=INTEGER}
+    </delete>
+
+    <delete id="deleteAllById">
+        DELETE FROM borrow WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id,jdbcType=INTEGER}
+        </foreach>
+    </delete>
+
+
+
+
+</mapper>

@@ -66,6 +66,11 @@ public class ResponseResult<T> {
         return response(20000,   message);
     }
 
+    public static <T> ResponseResult<T> success( T data) {
+
+        return response(20000, null,  data);
+    }
+
     public static <T> ResponseResult<T> success() {
 
         return response(20000);
